@@ -24,11 +24,11 @@ void IntrruptInit(void)
     GLOBAL_INTERRUPT = Enable;
 
     #if EXTERNAL_PIN0_ISR
-        _pltc0e = EXTERNAL_PIN0_ISR;
+        _int0e = EXTERNAL_PIN0_ISR;
     #endif
 
     #if EXTERNAL_PIN1_ISR
-        _int0e = EXTERNAL_PIN0_ISR;
+        _int1e = EXTERNAL_PIN1_ISR;
     #endif
 
     #if USIM_ISR
