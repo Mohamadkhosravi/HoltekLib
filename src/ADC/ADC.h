@@ -41,10 +41,10 @@
 #define USE_ADC_AN1      Enable
 #define USE_ADC_AN2      Enable
 #define USE_ADC_AN3      Enable
-#define USE_ADC_VBGREF   Disable
-#define USE_ADC_OPA0O    Disable
-#define USE_ADC_OPA1O    Disable
-#define USE_ADC_LINEV    Disable
+#define USE_ADC_VBGREF   Enable
+#define USE_ADC_OPA0O    Enable
+#define USE_ADC_OPA1O    Enable
+#define USE_ADC_LINEV    Enable
 
 
 // Define ADC channels based on usage
