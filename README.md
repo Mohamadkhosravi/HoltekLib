@@ -10,9 +10,9 @@
 - **USART**: Serial communication with support for Hardware UART for data transmission and reception.
 - **EEPROM Support**: Access and manage EEPROM for non-volatile storage.
 - **Timers**: 
-  - **Base Timers and BTimer**: Configuration and use of Base Timers 0 & 1, along with functions for basic timer operations.
-  - **Standard Type TM**: Support for Standard Type Timer operations.
-  - **Periodic TM Operation**: Functionality for periodic timer tasks.
+  - **Base Timers (BTM)**: Configuration and use of Base Timers 0 & 1, along with functions for basic timer operations.
+  - **Standard Type Timer (STM)**: Support for Standard Type Timer operations.
+  - **Periodic Timer (PTM)**: Functionality for periodic timer tasks.
 - **NTC Support**: Integration with NTC thermistors for temperature sensing.
 - **Display Control**: Manage 7-segment displays for numerical output.
 - **Lightweight and Efficient**: Designed for low-volume, resource-constrained applications.
