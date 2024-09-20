@@ -1,3 +1,9 @@
+/*
+ * Licensed under the Apache License, Version 2.0.
+ * You may not use this file except in compliance with the License.
+ * Obtain a copy at http://www.apache.org/licenses/LICENSE-2.0.
+ * Distributed on an "AS IS" basis, without warranties or conditions.
+ */
 /**
  * @file Display.h
  * @brief Header file for 7-segment display control, including loading animation.
@@ -5,7 +11,7 @@
  * This header defines the function prototypes and pin mappings used
  * for controlling a 7-segment display, including a loading animation.
  * 
- * Author: Mohamad Khosravi
+ * Author: Mohamad Khosravi  https://github.com/Mohamadkhosravi
  * Date: 2024
  * License: Apache License, Version 2.0
  */
