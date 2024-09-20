@@ -13,11 +13,14 @@
  * 
  * Author: Mohamad Khosravi  https://github.com/Mohamadkhosravi
  * Date: 2024
- * License: Apache License, Version 2.0
  */
 
 #ifndef _DISPLAY_H_
 #define _DISPLAY_H_
+
+// Macros for enabling and disabling features 
+#define Enable  1
+#define Disable 0
 
 // Define pins for the 7-segment display segments
 #define COM0 _pb5    // PB5
@@ -40,7 +43,7 @@
 #define SELECT_SEGMENT_4 COM3 = 1; COM0 = COM1 = COM2 = 0;
 
 // Macro to enable loading functionality
-#define START_LOADING   1
+#define START_LOADING   Enable
 #define START_DELAY     500
 #define START_BLINK_ON  50
 #define START_BLINK_OFF 100
