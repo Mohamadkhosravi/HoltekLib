@@ -153,12 +153,12 @@ void startLoading(void)
 {
     static unsigned int DelayCounter = START_DELAY; // Set delay for the loading animation
     static unsigned int Counter = 0;
-
+    unsigned i =8;
     // Start-up loading sequence
     do {
         --DelayCounter;  // Decrement delay counter
         Counter++;       // Increment animation counter
-		int i =8;
+	
         // Display loading sequence on the 7-segment display
         for (i = 8; i > 0; i--) {
             displayLoading(Counter % 8);  // Cycle through the 8 possible steps
