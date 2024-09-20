@@ -14,7 +14,6 @@
  *
  * Author: Mohamad Khosravi  https://github.com/Mohamadkhosravi
  * Date: 2024
- * License: Apache License, Version 2.0
  */
 
 #include "Display.h"
