@@ -121,10 +121,11 @@ void DisplayCharacters(unsigned char *stringOfCharacter, char clock) {
  *
  * @param step The current step of the loading animation (0-3).
  */
-void displayLoading(unsigned char step) {
+void displayLoading(unsigned char step) { 
     switch (step) {
         case 0:
         case 4:
+	    segmentCharacters('o');
             SELECT_SEGMENT_1;
             break;      
         case 1:
