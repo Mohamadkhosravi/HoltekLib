@@ -107,13 +107,12 @@ unsigned int ReadADC(unsigned char channel)
     ADC_OFF;
     
     // Read result based on resolution
-    if (_adrfs == 0) {
-        result = _sadoh;
-        result = (result << 8) | _sadol;
-    } else {
-        result = (_sadoh & 0x0F); // Only lower 4 bits are valid
-        result = (result << 8) | _sadol;
+    if( _adrfs == 1)
+    {   
+     result =((_sadol))|((_sadoh<<8));
     }
-
+    else {
+	result =((_sadol>>4))|((_sadoh<<4));
+     }
     return result; // Return the digital value
 }
