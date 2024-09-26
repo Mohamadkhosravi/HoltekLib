@@ -63,7 +63,7 @@ void RCC_Init(void);
 void Enter_Sleep_Mode(void);
 void Enter_Idle0_Mode(void);
 void Enter_Idle1_Mode(void);
-void Enter_Fast_Mode(void);  // New function for Fast Mode
+void Enter_Fast_Mode(void);  
 void Enable_Watchdog(void);
 void Disable_Watchdog(void);
 
