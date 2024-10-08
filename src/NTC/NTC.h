@@ -22,7 +22,7 @@
 #include "BA45F5240.h"
 
 // Uncomment the following line if you want to use the standard math library for logarithm calculations
-// #define _USE_MATH_H
+ #define _USE_MATH_H
 
 #ifdef _USE_MATH_H
     #include <math.h>
@@ -38,14 +38,14 @@
 
 // Select ADC resolution
 #define ADCNumerOfbits  ADC_12bit
-
 // Uncomment the appropriate line based on your NTC configuration
-// #define NTC_IS_PULLDOWN  /**< NTC is in pull-down configuration (NTC to GND, resistor to VCC) */
- #define NTC_IS_PULLUP   /**< NTC is in pull-up configuration (NTC to VCC, resistor to GND) */
+#define NTC_IS_PULLDOWN  /**< NTC is in pull-down configuration (NTC to GND, resistor to VCC) */
+//#define NTC_IS_PULLUP   /**< NTC is in pull-up configuration (NTC to VCC, resistor to GND) */
 
 #ifdef NTC_IS_PULLDOWN
     #define RES_PULLDOWN_WITH_NTC 10  /**< Resistor value (kOhm) when using pull-down configuration with NTC */
     #define RES_CONNECTED_TO_NTC    RES_PULLDOWN_WITH_NTC
+
     /**
      * @brief Calculate the resistance of the NTC in a pull-down configuration.
      * 
@@ -54,22 +54,14 @@
      * @param ResPullDown The pull-down resistor value.
      * @return The calculated resistance of the NTC.
      */
-    #define CALCULATE_RNTC(VNTC, VCC, ResPullDown) (((VCC) - (VNTC)) * (ResPullDown) / (VNTC))
+    #define CALCULATE_RNTC(VNTC, VCC, ResPullDown) (((VNTC) / ((VCC) - (VNTC))) * (ResPullDown))
     
-    /**
-     * @brief Calculate the voltage across the NTC in a pull-down configuration.
-     * 
-     * @param ADC_NTC The ADC value corresponding to the voltage across the NTC.
-     * @param ADCNumerOfbits The resolution of the ADC.
-     * @param VCC The supply voltage.
-     * @return The calculated voltage across the NTC.
-     */
-    #define CALCULATE_VNTC(ADC_NTC, ADCNumerOfbits, VCC) ((VCC) * (ADC_NTC) / (ADCNumerOfbits))
 #endif
 
 #ifdef NTC_IS_PULLUP
     #define RES_PULLUP_WITH_NTC 10  /**< Resistor value (kOhm) when using pull-up configuration with NTC */
     #define RES_CONNECTED_TO_NTC    RES_PULLUP_WITH_NTC
+
     /**
      * @brief Calculate the resistance of the NTC in a pull-up configuration.
      * 
@@ -78,18 +70,19 @@
      * @param ResPullUp The pull-up resistor value.
      * @return The calculated resistance of the NTC.
      */
-    #define CALCULATE_RNTC(VNTC, VCC, ResPullUp) (((VNTC) / ((VCC) - (VNTC))) * (ResPullUp))
-    
-    /**
-     * @brief Calculate the voltage across the NTC in a pull-up configuration.
-     * 
-     * @param ADC_NTC The ADC value corresponding to the voltage across the NTC.
-     * @param ADCNumerOfbits The resolution of the ADC.
-     * @param VCC The supply voltage.
-     * @return The calculated voltage across the NTC.
-     */
-    #define CALCULATE_VNTC(ADC_NTC, ADCNumerOfbits, VCC) ((VCC) * (ADC_NTC) / (ADCNumerOfbits))
+    #define CALCULATE_RNTC(VNTC, VCC, ResPullUp) (((VCC) - (VNTC)) * (ResPullUp) / (VNTC))
+
 #endif
+
+/**
+ * @brief Calculate the voltage across the NTC in a pull-down or pull-up configuration.
+ * 
+ * @param ADC_NTC The ADC value corresponding to the voltage across the NTC.
+ * @param ADCNumerOfbits The resolution of the ADC.
+ * @param VCC The supply voltage.
+ * @return The calculated voltage across the NTC.
+ */
+#define CALCULATE_VNTC(ADC_NTC, ADCNumerOfbits, VCC) ((VCC) * (ADC_NTC) / ((1 << (ADCNumerOfbits)) - 1))
 
 /**
  * @brief Steinhart-Hart coefficients for temperature calculation.
@@ -119,6 +112,6 @@
  * @param VDD The supply voltage.
  * @return The calculated temperature in Celsius.
  */
-float temperature(int ADCValue, float VDD);
+float temperature(unsigned int ADCValue, float VDD);
 
 #endif /* NTC_H */
