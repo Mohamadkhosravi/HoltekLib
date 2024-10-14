@@ -21,6 +21,10 @@
 
 #include "BA45F5240.h"
 
+// Uncomment to enable the use of the lookup table for faster temperature calculation.
+// If not defined, the calculation will use the Steinhart-Hart equation.
+#define USE_LOOKUP_TABLE
+
 // Uncomment the following line if you want to use the standard math library for logarithm calculations
  #define _USE_MATH_H
 
