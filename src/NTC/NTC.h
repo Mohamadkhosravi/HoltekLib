@@ -35,7 +35,11 @@
  *  - 1023.0 for 10-bit resolution
  *  - 255.0 for 8-bit resolution
  */
-#define ADC_RESOLUTION  4094.0  /**< ADC resolution (12-bit by default) */
+
+#define ADC_12bit  4094.0
+#define ADC_10bit  1023.0
+#define ADC_8bit   255.0
+#define ADC_RESOLUTION     ADC_12bit /**< ADC resolution (12-bit by default) */
 
 /** 
  * @brief Select NTC connection type.
@@ -45,7 +49,9 @@
  *  - NTC_IS_PULLDOWN: NTC connected to GND, resistor to VCC (pull-down).
  *  - NTC_IS_PULLUP: NTC connected to VCC, resistor to GND (pull-up).
  */
-#define NTC_CONNECTION  NTC_IS_PULLDOWN
+#define NTC_IS_PULLDOWN  /**< NTC is in pull-down configuration (NTC to GND, resistor to VCC) */
+#define NTC_IS_PULLUP   /**< NTC is in pull-up configuration (NTC to VCC, resistor to GND) */
+#define NTC_CONNECTION      NTC_IS_PULLDOWN
 
 /**
  * @brief Resistor value.
@@ -54,6 +60,10 @@
  */
 #define NTC_FIXED_RESISTOR  10  /**< Resistor value in kΩ */
 
+
+#define USE_LOOKUP_TABLE //this metode is faster but  its not ,,,
+#define USE_STENINHART//...
+#define TEMPERATURE_CALCULATION_METHOD     USE_LOOKUP_TABLE 
 /**
  * @brief Use lookup table for temperature calculation.
  * 
@@ -87,11 +97,13 @@
 // Use the NTC connection configuration
 #ifdef NTC_CONNECTION
     #if (NTC_CONNECTION == NTC_IS_PULLDOWN)
-        #define RES_CONNECTED_TO_NTC  NTC_FIXED_RESISTOR
-        #define CALCULATE_RNTC(VNTC, VCC, ResPullDown) (((VNTC) / (VCC - VNTC)) * ResPullDown)
+        #define RES_PULLUP_WITH_NTC     NTC_FIXED_RESISTOR /**< Resistor value (kOhm) when using pull-up configuration with NTC */
+        #define RES_CONNECTED_TO_NTC    RES_PULLUP_WITH_NTC
+        #define CALCULATE_RNTC(VNTC, VCC, ResPullDown) (((VNTC) / (VCC - VNTC)) * ResPullUp)
     #elif (NTC_CONNECTION == NTC_IS_PULLUP)
-        #define RES_CONNECTED_TO_NTC  NTC_FIXED_RESISTOR
-        #define CALCULATE_RNTC(VNTC, VCC, ResPullUp) (((VCC) - (VNTC)) * (ResPullUp) / (VNTC))
+        #define RES_PULLDOWN_WITH_NTC   NTC_FIXED_RESISTOR  /**< Resistor value (kOhm) when using pull-down configuration with NTC */
+        #define RES_CONNECTED_TO_NTC    RES_PULLDOWN_WITH_NTC
+        #define CALCULATE_RNTC(VNTC, VCC, ResPullUp) (((VCC) - (VNTC)) * (ResPullDown) / (VNTC))
     #endif
 #endif
 
@@ -106,7 +118,7 @@
 #define CALCULATE_VNTC(ADC_NTC, ADCNumerOfbits, VCC)((ADC_NTC / ADCNumerOfbits) * VCC)
 
 // If using lookup table for temperature calculation
-#ifdef USE_LOOKUP_TABLE
+#if ( TEMPERATURE_CALCULATION_METHOD ==  USE_LOOKUP_TABLE )
     /**
      * @brief Get temperature from lookup table based on resistance.
      * 
@@ -117,7 +129,7 @@
      * @return The calculated temperature in Celsius.
      */
     float GetTemperatureFromLookup(unsigned long resistance);
-#else
+ #elif ( TEMPERATURE_CALCULATION_METHOD ==  USE_STENINHART )
     // If using Steinhart-Hart equation for temperature calculation
     #ifdef USE_MATH_H
         #include <math.h>
