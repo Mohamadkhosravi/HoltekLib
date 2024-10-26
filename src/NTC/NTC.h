@@ -1,3 +1,4 @@
+
 /*
  * Licensed under the Apache License, Version 2.0.
  * You may not use this file except in compliance with the License.
@@ -5,13 +6,12 @@
  * Distributed on an "AS IS" basis, without warranties or conditions.
  */
 
-/**
+/** 
  * @file NTC.h
- * @brief Header file for NTC temperature calculations using ADC readings.
+ * @brief Header file for NTC temperature calculations.
  * 
- * This file contains macros, function prototypes, and configurations for calculating 
- * temperature using an NTC thermistor with an ADC. It supports both a lookup table 
- * and the Steinhart-Hart equation for temperature calculation.
+ * This file contains macros, function prototypes, and configurations for 
+ * calculating temperature using an NTC thermistor with an ADC.
  * 
  * Author: Mohamad Khosravi  https://github.com/Mohamadkhosravi
  * Date: 2024
@@ -22,167 +22,120 @@
 
 #include "BA45F5240.h"
 
-// ---------------------------------------------
-// User-configurable settings
-// ---------------------------------------------
+// ADC resolution definitions
+#define ADC_12bit  4094.0  // Maximum ADC value for 12-bit resolution
+#define ADC_10bit  1023.0   // Maximum ADC value for 10-bit resolution
+#define ADC_8bit   255.0    // Maximum ADC value for 8-bit resolution
+#define ADCNumerOfBits  ADC_12bit // Define the number of bits used for ADC
 
-/** 
- * @brief Select ADC resolution.
- * 
- * Choose the resolution of the ADC in your system.
- * Options:
- *  - 4094.0 for 12-bit resolution (default)
- *  - 1023.0 for 10-bit resolution
- *  - 255.0 for 8-bit resolution
- */
-
-#define ADC_12bit  4094.0
-#define ADC_10bit  1023.0
-#define ADC_8bit   255.0
-#define ADC_RESOLUTION     ADC_12bit /**< ADC resolution (12-bit by default) */
-
-/** 
- * @brief Select NTC connection type.
- * 
- * Choose whether the NTC thermistor is connected in pull-down or pull-up configuration.
- * Options:
- *  - NTC_IS_PULLDOWN: NTC connected to GND, resistor to VCC (pull-down).
- *  - NTC_IS_PULLUP: NTC connected to VCC, resistor to GND (pull-up).
- */
-#define NTC_IS_PULLDOWN  /**< NTC is in pull-down configuration (NTC to GND, resistor to VCC) */
-#define NTC_IS_PULLUP   /**< NTC is in pull-up configuration (NTC to VCC, resistor to GND) */
-#define NTC_CONNECTION      NTC_IS_PULLDOWN
-
-/**
- * @brief Resistor value.
- * 
- * Define the value of the fixed resistor in kΩ used in the NTC circuit.
- */
-#define NTC_FIXED_RESISTOR  10  /**< Resistor value in kΩ */
-
-
-#define USE_LOOKUP_TABLE //this metode is faster but  its not ,,,
-#define USE_STENINHART//...
-#define TEMPERATURE_CALCULATION_METHOD     USE_LOOKUP_TABLE 
-/**
- * @brief Use lookup table for temperature calculation.
- * 
- * Uncomment the line below if you want to use a lookup table for calculating temperature
- * instead of using the Steinhart-Hart equation.
- */
-//#define USE_LOOKUP_TABLE
-
-/**
- * @brief Use standard math library for logarithm.
- * 
- * Uncomment the line below if you want to use the standard math library for logarithmic calculations.
- */
-#define USE_MATH_H
-
-/**
- * @brief Control NTC power using PA7 pin.
- * 
- * Use these macros to turn the NTC circuit ON/OFF using pin PA7.
- */
+// NTC power control macros
 #define NTC_POWER_ON   _pa7 = 1  /**< Turns NTC ON by setting PA7 to HIGH */
 #define NTC_POWER_OFF  _pa7 = 0  /**< Turns NTC OFF by setting PA7 to LOW */
 
-// ---------------------------------------------
-// Main calculations and configurations
-// ---------------------------------------------
+// Temperature calculation method selection
+#define USE_STENINHART    0
+#define USE_LOOKUP_TABLE  1
+#define TEMPERATURE_CALCULATION_METHOD     USE_STENINHART 
 
-// Use the ADC resolution set by the user
-#define ADCNumerOfbits  ADC_RESOLUTION
+// Logarithm function selection for Steinhart-Hart calculations
+#define USE_MATH_H   0
+#define USE_CUSTOM_LOG_FUNCTION  1
+#define CALCULATE_STENINHART_LOGARITM_LIBRARY   USE_MATH_H
 
-// Use the NTC connection configuration
-#ifdef NTC_CONNECTION
-    #if (NTC_CONNECTION == NTC_IS_PULLDOWN)
-        #define RES_PULLUP_WITH_NTC     NTC_FIXED_RESISTOR /**< Resistor value (kOhm) when using pull-up configuration with NTC */
-        #define RES_CONNECTED_TO_NTC    RES_PULLUP_WITH_NTC
-        #define CALCULATE_RNTC(VNTC, VCC, ResPullDown) (((VNTC) / (VCC - VNTC)) * ResPullUp)
-    #elif (NTC_CONNECTION == NTC_IS_PULLUP)
-        #define RES_PULLDOWN_WITH_NTC   NTC_FIXED_RESISTOR  /**< Resistor value (kOhm) when using pull-down configuration with NTC */
-        #define RES_CONNECTED_TO_NTC    RES_PULLDOWN_WITH_NTC
-        #define CALCULATE_RNTC(VNTC, VCC, ResPullUp) (((VCC) - (VNTC)) * (ResPullDown) / (VNTC))
-    #endif
+// NTC configuration definitions
+#define NTC_IS_PULLDOWN  0 /**< NTC is in pull-down configuration (NTC to GND, resistor to VCC) */
+#define NTC_IS_PULLUP    1 /**< NTC is in pull-up configuration (NTC to VCC, resistor to GND) */
+#define NTC_TOPOLOGY  NTC_IS_PULLDOWN 
+
+// Resistor value in kO used in the NTC circuit
+#define NTC_FIXED_RESISTOR  10  /**< Fixed resistor value in kO **/
+
+
+#if TEMPERATURE_CALCULATION_METHOD == USE_LOOKUP_TABLE
+	float GetTemperatureFromLookup(unsigned long resistance);
+#elif TEMPERATURE_CALCULATION_METHOD == USE_STENINHART
+
+	#if CALCULATE_STENINHART_LOGARITM_LIBRARY == USE_MATH_H
+		#include <math.h>
+		#define LOG_FUNCTION log
+/*	#elif CALCULATE_STENINHART_LOGARITM_LIBRARY == USE_CUSTOM_LOG_FUNCTION*/
+	#else
+		float custom_log(float x); /**< Function prototype for custom logarithm function **/
+		#define LOG_FUNCTION custom_log
+	#endif
+
+    /*  @brief Steinhart-Hart coefficients for temperature calculation.
+    /*  3 point from your ntc in different temperatures , you can use from
+     https://www.thinksrs.com/downloads/programs/therm%20calc/ntccalibrator/ntccalculator.html
+    /*  Coefficients used:
+    * T1 = -30°C, R1 = 154882 kO
+    * T2 = 25°C, R2 = 10000 kO
+    * T3 = 80°C, R3 = 1228 kO
+    */
+    #define A 0.001277368779     /**< Steinhart-Hart coefficient A */
+    #define B 0.0002082232310    /**< Steinhart-Hart coefficient B */
+    #define C 0.0000002032989311 /**< Steinhart-Hart coefficient C */
+    float GetTemperatureFromSteinhart(float resistance);
+		
+#endif
+
+#if NTC_TOPOLOGY ==  NTC_IS_PULLDOWN 
+    #define RES_PULLDOWN_WITH_NTC   NTC_FIXED_RESISTOR  /**< Resistor value (kOhm) when using pull-down configuration with NTC */
+    #define RES_CONNECTED_TO_NTC    RES_PULLDOWN_WITH_NTC
+
+    /**
+     * @brief Calculate the resistance of the NTC in a pull-down configuration.
+     * 
+     * @param VNTC The voltage across the NTC.
+     * @param VCC The supply voltage.
+     * @param ResPullDown The pull-down resistor value.
+     * @return The calculated resistance of the NTC.
+     */
+  
+    #define CALCULATE_RNTC(VNTC, VCC, ResPullDown) (((VNTC) / (VCC - VNTC))*ResPullDown)
+   
+#elif  NTC_TOPOLOGY ==  NTC_IS_PULLUP
+    #define RES_PULLUP_WITH_NTC     NTC_FIXED_RESISTOR  /**< Resistor value (kOhm) when using pull-up configuration with NTC */
+    #define RES_CONNECTED_TO_NTC    RES_PULLUP_WITH_NTC
+
+    /**
+     * @brief Calculate the resistance of the NTC in a pull-up configuration.
+     * 
+     * @param VNTC The voltage across the NTC.
+     * @param VCC The supply voltage.
+     * @param ResPullUp The pull-up resistor value.
+     * @return The calculated resistance of the NTC.
+     */
+      
+    #define CALCULATE_RNTC(VNTC, VCC, ResPullUp) (((VCC) - (VNTC)) * (ResPullUp) / (VNTC))
+
 #endif
 
 /**
- * @brief Calculate the voltage across the NTC.
+ * @brief Calculate the voltage across the NTC in a pull-down or pull-up configuration.
  * 
  * @param ADC_NTC The ADC value corresponding to the voltage across the NTC.
  * @param ADCNumerOfbits The resolution of the ADC.
  * @param VCC The supply voltage.
  * @return The calculated voltage across the NTC.
  */
-#define CALCULATE_VNTC(ADC_NTC, ADCNumerOfbits, VCC)((ADC_NTC / ADCNumerOfbits) * VCC)
+#define CALCULATE_VNTC(ADC_NTC, ADCNumerOfbits, VCC)((ADC_NTC/ADCNumerOfbits)*VCC)
+ 
 
-// If using lookup table for temperature calculation
-#if ( TEMPERATURE_CALCULATION_METHOD ==  USE_LOOKUP_TABLE )
-    /**
-     * @brief Get temperature from lookup table based on resistance.
-     * 
-     * This function calculates the temperature corresponding to a given resistance
-     * using a predefined lookup table and linear interpolation.
-     * 
-     * @param resistance The resistance of the NTC (in kΩ).
-     * @return The calculated temperature in Celsius.
-     */
-    float GetTemperatureFromLookup(unsigned long resistance);
- #elif ( TEMPERATURE_CALCULATION_METHOD ==  USE_STENINHART )
-    // If using Steinhart-Hart equation for temperature calculation
-    #ifdef USE_MATH_H
-        #include <math.h>
-        #define LOG_FUNCTION log
-    #else
-        /**
-         * @brief Custom logarithm function.
-         * 
-         * This function calculates the natural logarithm of a number using a series expansion.
-         * It is used if math.h is not available.
-         * 
-         * @param x The input value for which the logarithm is to be calculated.
-         * @return The natural logarithm of the input value.
-         */
-        double custom_log(double x);
-        #define LOG_FUNCTION custom_log
-    #endif
-
-    /**
-     * @brief Steinhart-Hart coefficients for temperature calculation.
-     * 
-     * These coefficients are calculated based on 3 points from the NTC's datasheet.
-     * Example: 
-     * T1 = -30°C, R1 = 154882Ω
-     * T2 = 25°C, R2 = 10000Ω
-     * T3 = 80°C, R3 = 1228Ω
-     */
-    #define A 0.001277368779
-    #define B 0.0002082232310
-    #define C 0.0000002032989311
-
-    /**
-     * @brief Get temperature using the Steinhart-Hart equation.
-     * 
-     * This function calculates the temperature based on the resistance of the NTC
-     * using the Steinhart-Hart equation.
-     * 
-     * @param resistance The resistance of the NTC (in Ω).
-     * @return The calculated temperature in Celsius.
-     */
-    float GetTemperatureFromSteinhart(float resistance);
-#endif
 
 /**
  * @brief Calculate the temperature in Celsius from an ADC value and VDD voltage.
  * 
  * This function calculates the temperature based on the resistance of the NTC and
- * either the Steinhart-Hart equation or the lookup table, depending on the configuration.
+ * the provided Steinhart-Hart coefficients.
  * 
  * @param ADCValue The ADC value corresponding to the voltage across the NTC.
  * @param VDD The supply voltage.
  * @return The calculated temperature in Celsius.
  */
+
 float temperature(unsigned int ADCValue, float VDD);
+
+
 
 #endif /* NTC_H */
