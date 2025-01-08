@@ -18,38 +18,74 @@
 #ifndef _DISPLAY_H_
 #define _DISPLAY_H_
 
+#include "GPIO.h"
 // Macros for enabling and disabling features 
 #define Enable  1
 #define Disable 0
 
+#define DISPLAY_2_DIGIT 2
+#define DISPLAY_3_DIGIT 3
+#define DISPLAY_4_DIGIT 4
+
+#define NUMBER_OF_DIGIT DISPLAY_3_DIGIT
+
+#define COMMON_ANODE   0
+#define COMMON_CATHODE 1
+
+//COM_HIGH  1
+//COM_LOW   0
+//SEG_HIGH COM_LOW
+//SEG_LOW  COM_HIGH
+
+
 // Define pins for the 7-segment display segments
-#define COM0 _pb5    // PB5
-#define COM1 _pb6    // PB6
-#define COM2 _pb7    // PB7
-#define COM3 _pb4    // PB4
-#define SEGA _pc7    // PC7
-#define SEGB _pd0    // PD0
-#define SEGC _pc4    // PC4
-#define SEGD _pa7    // PA7
-#define SEGE _pc6    // PC6
-#define SEGF _pd1    // PD1
-#define SEGG _pc3    // PC3
-#define DOT  _pc5    // PC5
+#define COM0 COM_1
+#define COM1 COM_2
+#define COM2 COM_3
+#define COM3 
+#define SEGA SEG_A
+#define SEGB SEG_B
+#define SEGC SEG_C
+#define SEGD SEG_D
+#define SEGE SEG_E
+#define SEGF SEG_F
+#define SEGG SEG_G
+#define DOT  
+
+
  
 // Macros for selecting segments (COM lines)
-#define SELECT_SEGMENT_1 COM0 = 1; COM1 = COM2 = COM3 = 0;
-#define SELECT_SEGMENT_2 COM1 = 1; COM0 = COM2 = COM3 = 0;
-#define SELECT_SEGMENT_3 COM2 = 1; COM0 = COM1 = COM3 = 0;
-#define SELECT_SEGMENT_4 COM3 = 1; COM0 = COM1 = COM2 = 0;
+#if NUMBER_OF_DIGIT == DISPLAY_2_DIGIT
+#define SEGMENTS_TURN_OFF  COM0 = COM1= 0;
+#define SELECT_SEGMENT_1  COM0 = 1; COM1= 0;
+#define SELECT_SEGMENT_2  COM1 = 1; COM0 = 0;
+
+#elif NUMBER_OF_DIGIT == DISPLAY_3_DIGIT
+
+#define SEGMENTS_TURN_OFF  COM0 = COM1 =  COM2 = 0;
+#define SELECT_SEGMENT_1  COM0 = 1; COM1 = COM2 =  0;
+#define SELECT_SEGMENT_2  COM1 = 1; COM0 = COM2 =  0;
+#define SELECT_SEGMENT_3  COM2 = 1; COM0 = COM1 =  0;
+
+
+#else
+#define SEGMENTS_TURN_OFF  COM0 = COM1 =  COM2 = COM3= 0;
+#define SELECT_SEGMENT_1  COM0 = 1; COM1 = COM2 = COM3 = 0;
+#define SELECT_SEGMENT_2  COM1 = 1; COM0 = COM2 = COM3 = 0;
+#define SELECT_SEGMENT_3  COM2 = 1; COM0 = COM1 = COM3 = 0;
+#define SELECT_SEGMENT_4  COM3 = 1; COM0 = COM1 = COM2 = 0;
+
+#endif
+
+
 
 // Macro to enable loading functionality
-#define START_LOADING   Enable
+#define START_LOADING   Disable
 #define START_DELAY     500
 #define START_BLINK_ON  50
 #define START_BLINK_OFF 100
 
-/**
- * @brief Function to display a digit (0-9) on the 7-segment display.
+/* @brief Function to display a digit (0-9) on the 7-segment display.
  * @param number The digit to display (0-9).
  */
 void segmentNumbers(unsigned char number);
@@ -75,6 +111,7 @@ void Display(int number, unsigned char character, char clock);
  */
 void DisplayCharacters(unsigned char *stringOfCharacter, char clock);
 
+ #if START_LOADING
 /**
  * @brief Function to display a loading animation using the dot (.) on the 7-segment display.
  * This function makes use of the dot segment to create a rotating loading effect.
@@ -83,11 +120,11 @@ void DisplayCharacters(unsigned char *stringOfCharacter, char clock);
  */
 void displayLoading(unsigned char step);
 
-#if START_LOADING
 /**
  * @brief Function to initiate the start-up loading animation sequence.
  */
 void startLoading(void);
+
 #endif
 
 #endif

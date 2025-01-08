@@ -45,6 +45,8 @@ void segmentCharacters(unsigned char character) {
     switch (character) {
         case 'A': SEGA = SEGB = SEGC = SEGE = SEGF = SEGG = 0; SEGD = 1; break;
         case 'b': SEGA = SEGB = 1; SEGC = SEGD = SEGE = SEGF = SEGG = 0; break;
+        case 'C': SEGA = SEGD = SEGE = SEGF =0;  SEGB = SEGC = SEGG = 1; break;
+        case 'c': SEGA = SEGB = SEGC = SEGF=1;  SEGD = SEGE = SEGG = 0; break;
         case 'L': SEGA = SEGB = SEGC = SEGG = SEGF = 0; SEGD = 1; break;
         case 'N': SEGA = SEGB = SEGE = SEGF = 0; SEGD = SEGC = SEGG = 1; break;
         case 'o': SEGA = SEGB = SEGF = 0; SEGC = SEGD = SEGG = 1; break;
@@ -64,6 +66,29 @@ void segmentCharacters(unsigned char character) {
  */
 void Display(int number, unsigned char character, char clock) {
     switch (clock) {
+    	
+       #if  NUMBER_OF_DIGIT == DISPLAY_3_DIGIT 
+       
+		case 1:
+		    segmentNumbers((number / 10) % 10);
+		    SELECT_SEGMENT_1;
+		    break;
+		    
+		
+		case 2:
+		
+		    segmentNumbers(number% 10);
+		    SELECT_SEGMENT_2;
+		    break;
+		    
+		case 3:
+		     segmentCharacters(character);
+		    // segmentNumbers((number/100)%10);
+		   
+		    SELECT_SEGMENT_3;
+		    break;
+       
+       #else
         case 0:
             if (character != '0') {
                 segmentCharacters(character);
@@ -80,10 +105,17 @@ void Display(int number, unsigned char character, char clock) {
             segmentNumbers((number / 10) % 10);
             SELECT_SEGMENT_3;
             break;
+         
         case 3:
             segmentNumbers(number % 10);
             SELECT_SEGMENT_4;
+           
             break;
+        
+        
+        #endif
+       
+            
     }
 }
 
@@ -105,14 +137,20 @@ void DisplayCharacters(unsigned char *stringOfCharacter, char clock) {
         case 2:
             segmentCharacters(stringOfCharacter[2]);
             SELECT_SEGMENT_3;
-            break;    
+            break;   
+        #if  NUMBER_OF_DIGIT == DISPLAY_4_DIGIT     
         case 3:
             segmentCharacters(stringOfCharacter[3]);
             SELECT_SEGMENT_4;
-            break;    
+            break;   
+         #endif 
     }    
 }
+void DisplayOFF(void){
+	SEGMENTS_TURN_OFF;
+}
 
+ #if START_LOADING
 /**
  * @brief Displays a loading animation using the dot (.) on the 7-segment display.
  * 
@@ -121,6 +159,7 @@ void DisplayCharacters(unsigned char *stringOfCharacter, char clock) {
  *
  * @param step The current step of the loading animation (0-3).
  */
+  
 void displayLoading(unsigned char step) { 
     switch (step) {
         case 0:
@@ -143,7 +182,7 @@ void displayLoading(unsigned char step) {
     }
 }
 
-#if START_LOADING
+
 /**
  * @brief Start-up loading animation sequence on the 7-segment display.
  * 
