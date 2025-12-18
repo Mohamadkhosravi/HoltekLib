@@ -1,3 +1,20 @@
+/*
+ * Licensed under the Apache License, Version 2.0.
+ */
+
+/**
+ * @file    OneWire.h
+ * @brief   One-Wire protocol driver (Delay-Based + Non-Blocking)
+ *
+ * @author  Mohamad Khosravi
+ * @author  Hamidreza Kalhor
+ *
+ * @github  https://github.com/Mohamadkhosravi
+ * @github  https://github.com/hamiikalhor
+ * @date    2024
+ */
+
+
 #include "OneWire.h" 
 
 
