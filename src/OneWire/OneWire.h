@@ -51,6 +51,14 @@ uint8_t OneWire_read_byte(void);
 /* ================= Non-blocking control ================= */
 #if ONEWIRE_NON_BLOCKING_ENABLE
 
+#define ONEWIRE_STATE_IDLE             0
+#define ONEWIRE_STATE_RESET_LOW        1
+#define ONEWIRE_STATE_RESET_RELEASE    2
+#define ONEWIRE_STATE_WRITE_SLOT       3
+#define ONEWIRE_STATE_READ_SLOT        4
+#define ONEWIRE_STATE_FINISHED         5
+
+
 typedef union __attribute__((packed)) {
     struct {
         uint8_t busy     : 1;
@@ -60,6 +68,22 @@ typedef union __attribute__((packed)) {
     };
     uint8_t all;
 } OneWireFlags_t;
+
+typedef struct
+{
+	OneWireFlags_t Flags;
+
+	uint8_t State;
+
+	uint8_t Data;
+
+	uint8_t Mask;
+
+	uint16_t Tick;
+
+} OneWireHandle_t;
+
+
 #endif
 
 #endif
